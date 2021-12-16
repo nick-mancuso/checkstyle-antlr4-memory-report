@@ -84,9 +84,10 @@ Cons:
   that these objects are not cleared for performance reasons, and has worked to remove some ways to
   do so.
 - Increases run time by an average of 1.4 times for many projects and CI tasks; however gigantic
-  projects like openjdk 16 actually take less time (about 3-4 times faster). You can compare the
-  runtime of CI tasks at https://github.com/checkstyle/checkstyle/pull/10999 and other pull requests
-  to see the differences. On my local, `mvn clean verify` run time has increased by one minute.
+  projects like openjdk 16 actually take less time (about 3-4 times faster) in CI. You can compare
+  the runtime of CI tasks at https://github.com/checkstyle/checkstyle/pull/10999 and other pull
+  requests to see the differences. On my local, `mvn clean verify` run time has increased by one
+  minute.
 
 ### Eviction Policy
 
@@ -132,6 +133,6 @@ can have test and mutation coverage for the code that optimizes memory usage.
 
 The "Eviction Policy" solution is viable, but I would like to try "Clearing `ATNConfig`
 and `DFAState[]`" first, and see how users respond to an increased execution time. We can always
-implement this later if the need arises. I wrote the grammar and `JavaAstVisitor` in a fashion that
-would make future maintainence as simple as possible; I would only proceed with "Grammar
-Refactoring" as a last resort.
+implement some sort of cache later if the need arises. I wrote the grammar and `JavaAstVisitor` in a
+fashion that would make future maintainence as simple as possible; I would only proceed with "
+Grammar Refactoring" as a last resort.
