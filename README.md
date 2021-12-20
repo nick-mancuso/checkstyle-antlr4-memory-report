@@ -148,7 +148,7 @@ The idea here is that we would have less possible paths (or at least shorter pat
 we only branch AFTER we have matched the `expression` and `.`, tokens. But, now we cannot have
 individual `visit...` methods for each type of expression, unless we make another production rule to
 be visited, and make named alternatives within that rule. Making a visit method that checks for each
-type of expression and handles the necessary logic for each will get very complex. Also, the more
+type of expression and handles the necessary logic for each will get complex. Also, the more
 rules that we add, the deeper the stack grows as we build our parsetree. In other rules
 besides `expr`, this is not such a concern, but the deepest stacks are always seen in expressions (
 think concatenations, mathematical expressions, etc.).
