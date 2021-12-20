@@ -92,7 +92,7 @@ Cons:
 ### Eviction Policy
 
 Essentially, we would create a cache for `ATNConfig` and `DFAState[]` in classes derived
-from `ATNSimulator`.
+from `ATNSimulator`. Currently, ANTLR just accumulates an endless number of these objects.
 
 Pros:
 
@@ -109,6 +109,54 @@ Cons:
 
 ### Grammar Refactoring
 
+Example:
+
+Part of current `expr` rule:
+
+```antlrv4
+...
+    | expr bop=DOT id                                                      #refOp
+    | expr bop=DOT id LPAREN expressionList? RPAREN                        #methodCall
+    | expr bop=DOT LITERAL_THIS                                            #thisExp
+    | expr bop=DOT LITERAL_NEW nonWildcardTypeArguments?
+      innerCreator                                                         #initExp
+    | expr bop=DOT nonWildcardTypeArguments?
+      LITERAL_SUPER superSuffix?                                           #superExp
+    | expr bop=DOT
+      nonWildcardTypeArguments
+      id LPAREN expressionList? RPAREN                                     #invOp
+...
+
+```
+
+Could be refactored into something like:
+
+```antlrv4
+...
+    | expression bop='.'
+      ( IDENTIFIER
+      | methodCall
+      | THIS
+      | NEW nonWildcardTypeArguments? innerCreator
+      | SUPER superSuffix
+      | explicitGenericInvocation
+      )
+...
+```
+
+The idea here is that we would have less possible paths (or at least shorter paths) to store, since
+we only branch AFTER we have matched the `expression` and `.`, tokens. But, now we cannot have
+individual `visit...` methods for each type of expression, unless we make another production rule to
+be visited, and make named alternatives within that rule. Making a visit method that checks for each
+type of expression and handles the necessary logic for each will get very complex. Also, the more
+rules that we add, the deeper the stack grows as we build our parsetree. In other rules
+besides `expr`, this is not such a concern, but the deepest stacks are always seen in expressions (
+think concatenations, mathematical expressions, etc.).
+
+In either case, readability is harmed, and therefore increases the complexity of maintainence.
+Additionally, I do not think that there are enough areas in our grammar that could be refactored and
+make a significant difference in memory consumption.
+
 Pros:
 
 - Recommended by ANTLR in many memory usage issues
@@ -119,6 +167,7 @@ Cons:
 - Makes maintenance of grammar more difficult
 - Makes construction of AST more complex in `JavaAstVisitor`
 - Would require significant changes to the grammar and `JavaAstVisitor`
+- Actual memory usage improvement is likely insufficient
 
 ## Conclusion
 
